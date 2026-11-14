@@ -1,0 +1,38 @@
+/* Custom Styling für Drag & Drop und Animationen */
+html,
+body {
+    background-color: #020617;
+}
+
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            transition: all 0.2s ease-in-out;
+        }
+        .drop-zone.drag-over {
+            background-color: rgba(14, 165, 233, 0.2);
+            border-color: #38bdf8;
+            transform: scale(1.01);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        
