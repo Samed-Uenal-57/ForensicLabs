@@ -1,424 +1,192 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktives Forensik-Tutorium: Datenexfiltration</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>Forensik-Tutorium</title>
     <script src="forensik_tutorium.config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="forensik_tutorium.css">
-    <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-cyber-950 text-slate-200 font-sans min-h-screen flex flex-col selection:bg-cyber-500 selection:text-white">
-
-    <!-- Header & Navigation -->
-    <header class="border-b border-slate-800 bg-cyber-900/80 backdrop-blur sticky top-0 z-50">
+<body class="bg-white text-slate-800 font-sans min-h-screen flex flex-col selection:bg-cyber-500 selection:text-white">
+    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-cyber-500/10 border border-cyber-500/30 rounded-lg text-cyber-400">
                     <i class="fa-solid fa-user-shield text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg text-white tracking-wide">Digital Forensics Academy</h1>
-                    <p class="text-xs text-slate-400">Fallstudie: Datenexfiltration & USB-Spuren</p>
+                    <h1 class="font-bold text-lg text-slate-900 tracking-wide">Digital Forensics Tutorium</h1>
                 </div>
             </div>
-
-            <!-- Fortschritts-Anzeige -->
             <div class="hidden md:flex items-center gap-4">
                 <div class="text-right">
                     <div class="text-xs text-slate-400">Lernfortschritt</div>
                     <div class="text-sm font-semibold text-cyber-400" id="progress-text">0% abgeschlossen</div>
                 </div>
-                <div class="w-32 bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
+                <div class="w-32 bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
                     <div id="progress-bar" class="bg-gradient-to-r from-cyber-500 to-accent-purple h-full w-0 transition-all duration-500"></div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hauptbereich mit Tab-Navigation -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-        
-        <!-- Tab-Header Navigation -->
-        <nav class="flex flex-wrap gap-2 border-b border-slate-800 pb-4">
-            <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-cyber-500 text-white shadow-lg shadow-cyber-500/20">
-                <i class="fa-solid fa-book-open"></i> 1. Theorie & Artefakte
+        <nav class="flex flex-wrap gap-2 border-b border-slate-200 pb-4" aria-label="Kapitel-Navigation">
+            <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn active-tab px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-book-open"></i> 1. Theorie
             </button>
-            <button onclick="switchTab('dragdrop1')" id="tab-dragdrop1" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800">
-                <i class="fa-solid fa-list-check"></i> 2. Übung: Prozesskette
+            <button onclick="switchTab('technical')" id="tab-technical" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-microchip"></i> 2. Autopsy
             </button>
-            <button onclick="switchTab('dragdrop2')" id="tab-dragdrop2" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800">
-                <i class="fa-solid fa-puzzle-piece"></i> 3. Übung: Artefakte
+            <button onclick="switchTab('artifacts')" id="tab-artifacts" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-box-open"></i> 3. Artefakte
             </button>
-            <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800">
-                <i class="fa-solid fa-graduation-cap"></i> 4. Wissens-Quiz
+            <button onclick="switchTab('exercises')" id="tab-exercises" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-list-check"></i> 4. Übungen
+            </button>
+            <button onclick="switchTab('scenario')" id="tab-scenario" class="tab-btn px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-route"></i> 5. Szenario
             </button>
         </nav>
 
-        <!-- SEKTION 1: THEORIE UND LERNEINHEITEN -->
         <section id="content-theory" class="tab-content flex flex-col gap-6">
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-                    <i class="fa-solid fa-magnifying-glass text-cyber-400"></i>
-                    Grundlagen der Digitalen Forensik bei Datenexfiltration
-                </h2>
-                <p class="text-slate-300 leading-relaxed">
-                    Willkommen Ermittler! In diesem Modul lernst du, wie IT-Forensiker vorgehen, wenn der Verdacht besteht, dass sensible Unternehmensdaten (z. B. eine Dateiliste <code>Mallorca.txt</code> oder ein Ordner <code>Urlaubsfotos</code>) über einen USB-Stick entwendet wurden.
-                </p>
+            <div class="chapter-header">
+                <h2><i class="fa-solid fa-book-open text-cyber-400"></i> 1. Theorie</h2>
+                <p>Platzhalter für theoretische Grundlagen und Lernziele.</p>
             </div>
-
-            <!-- Modul Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Karte 1 -->
-                <div class="bg-slate-900 border border-slate-800 hover:border-cyber-500/50 rounded-xl p-5 transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-lg bg-cyber-500/10 border border-cyber-500/30 text-cyber-400 flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-lock text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">1. Sicheres Sichern & Hashing</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Bevor Daten analysiert werden, muss das Original geschützt werden. Die VM wird heruntergefahren und ein Klon/Image erstellt. 
-                        </p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs font-mono text-slate-300">
-                            <span class="text-cyber-400">Hash-Standard:</span> SHA-256 sichert die Unveränderlichkeit (Integrität) vor Gericht. MD5 gilt als veraltet.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Karte 2 -->
-                <div class="bg-slate-900 border border-slate-800 hover:border-cyber-500/50 rounded-xl p-5 transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-lg bg-accent-purple/10 border border-accent-purple/30 text-accent-purple flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-database text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">2. Die Master File Table ($MFT)</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Die $MFT ist das Inhaltsverzeichnis des NTFS-Dateisystems. Beim Löschen werden Dateien nicht sofort vernichtet, sondern als "frei" markiert.
-                        </p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs text-slate-300">
-                            <strong>Resident Data:</strong> Sehr kleine Dateien (wie Kurztext) liegen direkt in der $MFT & überleben oft das Löschen.<br>
-                            <strong>Non-Resident:</strong> Große Datenblöcke werden bei Neubelegung überschrieben.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Karte 3 -->
-                <div class="bg-slate-900 border border-slate-800 hover:border-cyber-500/50 rounded-xl p-5 transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-lg bg-accent-amber/10 border border-accent-amber/30 text-accent-amber flex items-center justify-center mb-4">
-                            <i class="fa-brands fa-usb text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">3. Registry: USBSTOR</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Windows vergisst kein USB-Gerät! Wenn ein USB-Stick eingesteckt wird, speichert Windows Hersteller, Modell und Seriennummer ab.
-                        </p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs font-mono text-slate-300">
-                            HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR
-                            <br><span class="text-accent-amber">Beweis:</span> Eindeutiger Match mit sichergestellten USB-Sticks!
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Karte 4 -->
-                <div class="bg-slate-900 border border-slate-800 hover:border-cyber-500/50 rounded-xl p-5 transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-lg bg-accent-green/10 border border-accent-green/30 text-accent-green flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-link text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">4. LNK-Dateien & Recent Files</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Windows erstellt automatisch Verknüpfungen (.lnk), wenn Dateien geöffnet oder kopiert werden.
-                        </p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs text-slate-300">
-                            Enthält Angaben zum ursprünglichen Pfad (z. B. <code>E:\Urlaubsfotos\Mallorca.txt</code>), Laufwerksbuchstaben und Volume-Namen.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Karte 5 -->
-                <div class="bg-slate-900 border border-slate-800 hover:border-cyber-500/50 rounded-xl p-5 transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-lg bg-accent-rose/10 border border-accent-rose/30 text-accent-rose flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">5. Event Logs & Zeitstempel</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Windows protokolliert Systemereignisse in <code>.evtx</code>-Dateien. 
-                        </p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs text-slate-300">
-                            <strong>System.evtx:</strong> Zeigt exakte Zeitpunkte für USB-Treiberinstallationen & Geräte-Verbindungen (Event-ID 20001 / 20003).
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Karte 6 -->
-                <div class="bg-slate-900 border border-slate-800 hover:border-cyber-500/50 rounded-xl p-5 transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-lg bg-cyber-500/10 border border-cyber-500/30 text-cyber-400 flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-laptop-code text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">6. Analyse mit Autopsy</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Autopsy bündelt all diese Spuren in einer Grafischen Oberfläche.
-                        </p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs text-slate-300">
-                            Erlaubt Rekonstruktion von gelöschten MFT-Einträgen, Durchsuchen von LNK-Dateien und Keyword-Suchen nach <code>Mallorca</code>.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-6">
-                <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-3">
-                    <i class="fa-solid fa-hard-drive text-accent-amber"></i>
-                    VMDK forensisch bereitstellen und in Autopsy importieren
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
-                    <ol class="space-y-2 text-slate-300 list-decimal list-inside">
-                        <li>VM vollständig herunterfahren, Snapshot- und Originaldateien unverändert sichern.</li>
-                        <li>Arbeitskopie der <code>.vmdk</code> anlegen und Schreibschutz bzw. eine forensische Arbeitsumgebung verwenden.</li>
-                        <li>SHA-256-Hash von Original und Arbeitskopie berechnen und im Untersuchungsprotokoll dokumentieren.</li>
-                        <li>In Autopsy <strong class="text-white">New Case</strong> anlegen, dann <strong class="text-white">Add Data Source</strong> wählen.</li>
-                        <li><strong class="text-white">Disk Image or VM File</strong> auswählen, die VMDK hinzufügen und die Image-Erkennung prüfen.</li>
-                    </ol>
-                    <div class="bg-slate-950 border border-slate-700 rounded-lg p-4 font-mono text-xs text-slate-300">
-                        <div class="text-cyber-400 mb-2">Prüfpunkte nach dem Import</div>
-                        <div>Image-Typ: VMDK / erkannte Partition</div>
-                        <div>Dateisystem: NTFS</div>
-                        <div>Quelle: Arbeitskopie, nicht Original</div>
-                        <div>Integrität: SHA-256 dokumentiert</div>
-                        <div class="mt-3 text-amber-300">Nie ein Beweisimage zur Analyse booten oder schreibend einbinden.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/70 border border-cyber-500/30 rounded-xl p-6">
-                <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-3">
-                    <i class="fa-solid fa-route text-cyber-400"></i>
-                    Fallstudie: Urlaubsfotos Schritt für Schritt
-                </h3>
-                <ol class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-300 list-decimal list-inside">
-                    <li><strong class="text-white">Anmeldung:</strong> Security.evtx in Autopsy öffnen und erfolgreiche bzw. fehlgeschlagene Anmeldungen anhand der passenden EventIDs (z. B. 4624, 4625, 4634, 4647) zeitlich einordnen.</li>
-                    <li><strong class="text-white">Recent Files:</strong> Recent-Documents/LNK-Artefakte nach <code>Urlaubsfotos</code> und geöffneten wichtigen Dateien durchsuchen.</li>
-                    <li><strong class="text-white">Explorer-Suche:</strong> Nach dem Ordnernamen <code>Urlaubsfotos</code> suchen und Pfad, Benutzer und Zeitstempel dokumentieren.</li>
-                    <li><strong class="text-white">Gelöschter Ordner:</strong> Im <code>$MFT</code> nach dem gelöschten Ordner suchen; gelöschte Einträge als solche kennzeichnen.</li>
-                    <li><strong class="text-white">Großer Ordner:</strong> Wenn der Ordnerinhalt nicht resident ist, den MFT-Eintrag nur als Metadatenbeleg verwenden und die Kinddateien separat aus dem MFT rekonstruieren.</li>
-                    <li><strong class="text-white">Resident Data:</strong> <code>Mallorca.txt</code> kann bei ausreichender Größe direkt aus dem MFT-Eintrag lesbar sein.</li>
-                    <li><strong class="text-white">Inhalt:</strong> Die Datei enthält die Überschrift <em>wertvolle Dateien</em> und die Namen der wichtigen Dateien.</li>
-                    <li><strong class="text-white">Kopien:</strong> Kopien im Urlaubsverzeichnis mit den Ursprungsdateien vergleichen. Der Creation-Zeitstempel der Kopie kann dem Modified-Zeitstempel des Originals entsprechen.</li>
-                    <li><strong class="text-white">Jumplists:</strong> Nach <code>Urlaubsfotos</code> suchen; ein Eintrag kann die Öffnung über einen USB-Stick belegen.</li>
-                    <li><strong class="text-white">USB-Abgleich:</strong> <code>SYSTEM\CurrentControlSet\Enum\USBSTOR</code> auswerten und Seriennummer, Hersteller und Modell mit dem sichergestellten Stick vergleichen.</li>
-                </ol>
-                <p class="mt-4 text-xs text-amber-300"><i class="fa-solid fa-circle-info mr-1"></i> EventIDs und Zeitstempel immer mit der konkreten Windows-Version, Zeitzone und weiteren Artefakten korrelieren; ein einzelnes Artefakt ist selten ein vollständiger Beweis.</p>
-            </div>
-
-            <!-- Handlungsaufforderung -->
-            <div class="flex justify-end mt-4">
-                <button onclick="switchTab('dragdrop1')" class="px-6 py-3 bg-cyber-500 hover:bg-cyber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-cyber-500/25">
-                    Weiter zu Übung 1: Prozesskette <i class="fa-solid fa-arrow-right"></i>
-                </button>
+            <div class="placeholder-grid">
+                <div class="placeholder-card"><h3>Platzhalter: Thema 1</h3><p>Inhalt folgt.</p></div>
+                <div class="placeholder-card"><h3>Platzhalter: Thema 2</h3><p>Inhalt folgt.</p></div>
             </div>
         </section>
 
-        <!-- SEKTION 2: DRAG & DROP ÜBUNG 1 (REIHENFOLGE) -->
-        <section id="content-dragdrop1" class="tab-content hidden flex-col gap-6">
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-                    <i class="fa-solid fa-arrow-down-1-9 text-cyber-400"></i>
-                    Übung 1: Die forensische Ablaufkette
-                </h2>
-                <p class="text-slate-300">
-                    Bringe die 5 Schritte eines forensischen Ermittlungsverfahrens in die richtige chronologische Reihenfolge. Ziehe die Kärtchen an die passende Stelle.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Quell-Karten -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-md font-semibold text-slate-300 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-hand text-cyber-400"></i> Verfügbare Schritte (Ziehen):
-                    </h3>
-                    <div id="seq-source" class="flex flex-col gap-3 min-h-[300px]">
-                        <div id="step-hash" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-lg text-sm text-slate-200 font-medium flex items-center justify-between shadow-sm">
-                            <span><i class="fa-solid fa-fingerprint text-cyber-400 mr-2"></i> SHA-256 Hashwert der VM-Disk sichern</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="step-report" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-lg text-sm text-slate-200 font-medium flex items-center justify-between shadow-sm">
-                            <span><i class="fa-solid fa-file-contract text-accent-green mr-2"></i> Forensisches Gutachten & Bericht schreiben</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="step-shutdown" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-lg text-sm text-slate-200 font-medium flex items-center justify-between shadow-sm">
-                            <span><i class="fa-solid fa-power-off text-accent-rose mr-2"></i> VM ordnungsgemäß herunterfahren (Statisches Image)</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="step-analyze" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-lg text-sm text-slate-200 font-medium flex items-center justify-between shadow-sm">
-                            <span><i class="fa-solid fa-magnifying-glass-chart text-accent-purple mr-2"></i> Artefakte in Autopsy analysieren ($MFT, Registry, LNK)</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="step-autopsy" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 hover:bg-slate-700/80 border border-slate-700 p-4 rounded-lg text-sm text-slate-200 font-medium flex items-center justify-between shadow-sm">
-                            <span><i class="fa-solid fa-box-open text-accent-amber mr-2"></i> Disk-Image (VDI/VMDK) in Autopsy importieren</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ziel-Slots -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-md font-semibold text-slate-300 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-list-ol text-accent-purple"></i> Richtige Reihenfolge (1 - 5):
-                        </h3>
-                        <div class="flex flex-col gap-3">
-                            <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-950/50 p-3 rounded-lg min-h-[56px] flex items-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-slot="1">
-                                <span class="text-xs text-slate-500 font-bold mr-3">SCHRITT 1:</span>
-                            </div>
-                            <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-950/50 p-3 rounded-lg min-h-[56px] flex items-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-slot="2">
-                                <span class="text-xs text-slate-500 font-bold mr-3">SCHRITT 2:</span>
-                            </div>
-                            <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-950/50 p-3 rounded-lg min-h-[56px] flex items-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-slot="3">
-                                <span class="text-xs text-slate-500 font-bold mr-3">SCHRITT 3:</span>
-                            </div>
-                            <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-950/50 p-3 rounded-lg min-h-[56px] flex items-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-slot="4">
-                                <span class="text-xs text-slate-500 font-bold mr-3">SCHRITT 4:</span>
-                            </div>
-                            <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-950/50 p-3 rounded-lg min-h-[56px] flex items-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-slot="5">
-                                <span class="text-xs text-slate-500 font-bold mr-3">SCHRITT 5:</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex items-center justify-between">
-                        <button onclick="resetDragDrop1()" class="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-lg text-sm transition-all">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> Zurücksetzen
-                        </button>
-                        <button onclick="checkDragDrop1()" class="px-6 py-2.5 bg-cyber-500 hover:bg-cyber-600 text-white font-semibold rounded-lg text-sm transition-all shadow-md">
-                            Prüfen
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feedback Modal / Box -->
-            <div id="dd1-feedback" class="hidden p-4 rounded-xl border"></div>
-        </section>
-
-        <!-- SEKTION 3: DRAG & DROP ÜBUNG 2 (ARTEFAKTE ZUORDNEN) -->
-        <section id="content-dragdrop2" class="tab-content hidden flex-col gap-6">
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-                    <i class="fa-solid fa-puzzle-piece text-accent-purple"></i>
-                    Übung 2: Artefakte & deren forensische Bedeutung
-                </h2>
-                <p class="text-slate-300">
-                    Ordne die Spuren (Artefakte) der passenden ermittlungstechnischen Erkenntnis zu.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Artefakt Karten -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
-                    <h3 class="text-md font-semibold text-slate-300 mb-4">Gefundene Artefakte:</h3>
-                    <div id="art-source" class="flex flex-col gap-3 min-h-[280px]">
-                        <div id="art-usbstor" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 border border-slate-700 p-3 rounded-lg text-sm text-cyber-400 font-mono font-semibold flex items-center justify-between">
-                            <span><i class="fa-brands fa-usb mr-2"></i> Registry: USBSTOR Schlüssel</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="art-mft" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 border border-slate-700 p-3 rounded-lg text-sm text-accent-purple font-mono font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-table mr-2"></i> Dateisystem: $MFT (Master File Table)</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="art-lnk" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 border border-slate-700 p-3 rounded-lg text-sm text-accent-green font-mono font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-link mr-2"></i> LNK-Files & Recent Documents</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                        <div id="art-event" draggable="true" ondragstart="drag(event)" class="draggable-item bg-slate-800 border border-slate-700 p-3 rounded-lg text-sm text-accent-rose font-mono font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-clock mr-2"></i> Event Logs: System.evtx</span>
-                            <i class="fa-solid fa-grip-vertical text-slate-500"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ziel-Kategorien -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-md font-semibold text-slate-300 mb-4">Erkenntnis im Ermittlungsfall:</h3>
-                        <div class="flex flex-col gap-4">
-                            <!-- Slot 1 -->
-                            <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-lg">
-                                <div class="text-xs text-slate-400 mb-2">Beweist den exakten Zeitpunkt, an dem der USB-Treiber geladen wurde:</div>
-                                <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-900 p-2.5 rounded min-h-[48px]" ondrop="drop(event)" ondragover="allowDrop(event)" data-match="art-event"></div>
-                            </div>
-                            <!-- Slot 2 -->
-                            <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-lg">
-                                <div class="text-xs text-slate-400 mb-2">Liefert Seriennummer und Hardware-Hersteller des USB-Sticks:</div>
-                                <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-900 p-2.5 rounded min-h-[48px]" ondrop="drop(event)" ondragover="allowDrop(event)" data-match="art-usbstor"></div>
-                            </div>
-                            <!-- Slot 3 -->
-                            <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-lg">
-                                <div class="text-xs text-slate-400 mb-2">Beweist den Zugriff auf Dateipfade auf Wechseldatenträgern (z.B. E:\Urlaubsfotos):</div>
-                                <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-900 p-2.5 rounded min-h-[48px]" ondrop="drop(event)" ondragover="allowDrop(event)" data-match="art-lnk"></div>
-                            </div>
-                            <!-- Slot 4 -->
-                            <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-lg">
-                                <div class="text-xs text-slate-400 mb-2">Ermöglicht das Rekonstruieren von gelöschten Dateinamen & Metadaten:</div>
-                                <div class="drop-zone border-2 border-dashed border-slate-700 bg-slate-900 p-2.5 rounded min-h-[48px]" ondrop="drop(event)" ondragover="allowDrop(event)" data-match="art-mft"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex items-center justify-between">
-                        <button onclick="resetDragDrop2()" class="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-lg text-sm transition-all">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> Zurücksetzen
-                        </button>
-                        <button onclick="checkDragDrop2()" class="px-6 py-2.5 bg-accent-purple hover:bg-purple-600 text-white font-semibold rounded-lg text-sm transition-all shadow-md">
-                            Prüfen
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feedback Modal / Box -->
-            <div id="dd2-feedback" class="hidden p-4 rounded-xl border"></div>
-        </section>
-
-        <!-- SEKTION 4: MULTIPLE CHOICE QUIZ -->
-        <section id="content-quiz" class="tab-content hidden flex-col gap-6">
-            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 flex items-center justify-between">
+        <section id="content-technical" class="tab-content hidden flex flex-col gap-6">
+            <div class="autopsy-hero">
+                <img src="bilder/AutopsyStartUp.jpg" alt="Startansicht von Autopsy">
                 <div>
-                    <h2 class="text-2xl font-bold text-white mb-1 flex items-center gap-3">
-                        <i class="fa-solid fa-graduation-cap text-accent-amber"></i>
-                        Forensik-Abschluss-Quiz
-                    </h2>
-                    <p class="text-slate-300 text-sm">Teste dein Wissen zur Datenexfiltration und System-Analyse!</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-center">
-                    <span class="text-xs text-slate-400 block">Erreichte Punkte</span>
-                    <span id="quiz-score-display" class="text-xl font-bold text-accent-amber">0 / 7</span>
+                    <span class="eyebrow">Praktische Analyseumgebung</span>
+                    <h2><i class="fa-solid fa-microchip"></i>  Autopsy</h2>
+                    <p>Forensisches Analysetool für Festplatten und Dateisysteme.</p>
                 </div>
             </div>
-
-            <!-- Quiz Container -->
-            <div id="quiz-container" class="flex flex-col gap-6">
-                <!-- Fragen werden dynamisch per JavaScript eingefügt -->
+            <div class="chapter-header autopsy-intro">
+                <p>Open Source Forensik-Tool für die Analyse von Festplatten, Dateisystemen und Mobilgeräten. <br>
+                    Die Analysemethoden sind transparent und wissenschaftlich überprüfbar, was ein entscheidendes Kriterium ist
+                    für die Verwendbarkeit von Beweisen vor Gericht. <br>
+                    Autopsy wurde im Jahr 2000 von Brian Carrier entwickelt und durch die Unterstützung von Sleuth Kit Labs erweitert.
+                </p>
             </div>
-
-            <div class="flex justify-between items-center mt-4">
-                <button onclick="resetQuiz()" class="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-lg text-sm transition-all">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Quiz Neustarten
-                </button>
+            <div class="autopsy-section-title">
+                <span class="eyebrow">Kernfunktionen</span>
+                <h3>Warum Autopsy?</h3>
+            </div>
+            <div class="autopsy-grid">
+                <div class="placeholder-card autopsy-card autopsy-card-blue"><div class="card-icon"><i class="fa-solid fa-hard-drive"></i></div><h3>Technische Kapazitäten</h3>
+                    <p><strong>Wiederherstellung gelöschter Dateien:</strong> <br>
+                        Autopsy erkennt und rekonstruiert gelöschte Dateien, sofern die zugehörigen
+                        Datenblöcke noch nicht überschrieben wurden <br>
+                        <strong>File Carving:</strong> <br>
+                        Geht das Dateisystem verloren oder wurde der Papierkorb geleert, extrahiert Autopsy Dateien anhand
+                        ihrer Header- und Footer-Signaturen direkt aus dem unzugeordneten Speicherplatz (unallocated space).
+                        <strong>Inhalts- und Volltextsuche:</strong><br>
+                        Dank integrierter Indizierung durchsucht das Tool den gesamten Datenträger nach Schlagwörtern (z.B. Dateienamen)
+                    </p>
+                </div>
+                <div class="placeholder-card autopsy-card autopsy-card-purple"><div class="card-icon"><i class="fa-solid fa-chart-line"></i></div><h3>Analysefunktionen</h3>
+                    <p><strong>Modulare Analyse (Ingest Modules):</strong><br>
+                        Automatisierte Auswertung beim Einlesen des Images
+                        (z.B. Recent Activity, Keyword Search, File Type Identification) <br>
+                        <strong>Zeitachsen-Analyse (Timeline):</strong><br>
+                        Virtualisierung sämtlicher Datei- und Systemereignisse (MACB Zeiten: Modified, Accessed, Changed, Birth)
+                        , um Dateikopien chronologisch nachzuvollziehen <br>
+                        <strong>Hash-Wert Abgleich (Hash Lookup):</strong><br>
+                        Automatisierter Vergleich von Dateien mit bekannten Datenbanken (z.B. NSRL) zum Ausfiltern von Systemdateien
+                        oder zum Identifizieren von bekannten Beweismitteln. <br>
+                    </p>
+                </div>
+                <div class="placeholder-card autopsy-card autopsy-card-amber"><div class="card-icon"><i class="fa-solid fa-fingerprint"></i></div><h3>Artefakt-Extraktion</h3>
+                    <p><strong>USB-Gerätehistorie (Registry):</strong> <br>
+                        Auslesen von Hardwareinforamationen und Zeitstempeln, um nachzuweisen, wann ein spezifischer USB-Stick
+                        angeschlossen und entfernt wurde. <br>
+                        <strong>Spuren des Papierkorbs:</strong><br>
+                        Analyse von $Recycle.Bin, um gelöschte Dateien bzw. Ordner und deren ursprünglichen Speicherort zu rekonstruieren. <br>
+                        <strong>Zentrales Repository:</strong><br>
+                        Ermöglicht den geräteübergreifenden Abgleich von Artefakten, z.B. um gefundene Dateien direkt mit den
+                        Spuren auf dem Arbeitsplatz zu verknüpfen. <br>
+                    </p>
+                </div>
+                <div class="placeholder-card autopsy-image-panel">
+                    <div class="card-icon"><i class="fa-solid fa-image"></i></div>
+                    <h3>Analyse einer Image mit Autopsy</h3>
+                    <p>Die Analyse erfolgt in drei Schritten:</p>
+                    <div class="autopsy-step-grid">
+                        <article class="autopsy-step autopsy-step-blue">
+                            <span class="step-number">01</span>
+                            <h4>Image einlesen</h4>
+                            <p>Wir führen die Sequenz einer typischen statischen Übernahme durch (Static Acquisition).</p>
+                            <ol>
+                                <li>Datenträger oder Medium sichern</li>
+                                <li>Datenträger nur lesbar machen</li>
+                                <li>Forensisches Abbild erstellen (Disk Imaging)</li>
+                                <li>Abbild auf Integrität prüfen</li>
+                            </ol>
+                        </article>
+                        <article class="autopsy-step autopsy-step-purple">
+                            <span class="step-number">02</span>
+                            <h4>Image in Autopsy laden</h4>
+                            <p>Das Abbild in Autopsy laden, die Analyseparameter konfigurieren und die gewünschten Ingest-Module auswählen.</p>
+                            <p>Autopsy führt anschließend eine vollständige Analyse durch und erstellt eine Übersicht der gefundenen Artefakte.</p>
+                        </article>
+                        <article class="autopsy-step autopsy-step-amber">
+                            <span class="step-number">03</span>
+                            <h4>Artefakte analysieren und extrahieren</h4>
+                            <p>Die gefundenen Spuren untersuchen, bewerten und für die weitere forensische Auswertung sichern.</p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <h3>Kurzgefasst:</h3>
+            <div class="evidence-flow">
+                <div><span class="flow-number">01</span><strong>Image einlesen</strong><small>Datenträger forensisch sichern</small></div>
+                <i class="fa-solid fa-arrow-right"></i>
+                <div><span class="flow-number">02</span><strong>Ingest analysieren</strong><small>Module und Zeitachsen auswerten</small></div>
+                <i class="fa-solid fa-arrow-right"></i>
+                <div><span class="flow-number">03</span><strong>Spuren korrelieren</strong><small>Artefakte als Beweise einordnen</small></div>
             </div>
         </section>
 
+        <section id="content-artifacts" class="tab-content hidden flex flex-col gap-6">
+            <div class="chapter-header">
+                <h2><i class="fa-solid fa-box-open text-cyber-400"></i> 3. Artefakte</h2>
+                <p>Platzhalter für die Beschreibung, Einordnung und Auswertung relevanter Artefakte.</p>
+            </div>
+            <div class="placeholder-card"><h3>Platzhalter: Artefakt-Übersicht</h3><p>Inhalt folgt.</p></div>
+        </section>
+
+        <section id="content-exercises" class="tab-content hidden flex flex-col gap-6">
+            <div class="chapter-header">
+                <h2><i class="fa-solid fa-list-check text-cyber-400"></i> 4. Übungen</h2>
+                <p>Platzhalter für praktische Aufgaben und Lernkontrollen.</p>
+            </div>
+            <div class="placeholder-grid">
+                <div class="placeholder-card"><h3>Platzhalter: Übung 1</h3><p>Inhalt folgt.</p></div>
+                <div class="placeholder-card"><h3>Platzhalter: Übung 2</h3><p>Inhalt folgt.</p></div>
+            </div>
+        </section>
+
+        <section id="content-scenario" class="tab-content hidden flex flex-col gap-6">
+            <div class="chapter-header">
+                <h2><i class="fa-solid fa-route text-cyber-400"></i> 5. Szenario</h2>
+                <p>Platzhalter für das Anwendungsszenario und den Ablauf der Fallbearbeitung.</p>
+            </div>
+            <div class="placeholder-card"><h3>Platzhalter: Szenario</h3><p>Inhalt folgt.</p></div>
+        </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-cyber-950 py-6 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-            Didaktisches Lernmodul für Forensik-Simulationen &bull; Erstellt für IT-Sicherheits-Unterricht
-        </div>
+    <footer class="border-t border-slate-200 bg-slate-50 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">Forensik-Tutorium</div>
     </footer>
     <script src="forensik_tutorium.js"></script>
 </body>
